@@ -12,6 +12,9 @@ const authModel = new mongoose.Schema({
     required: true,
     trim: true,
   },
+  token: {
+    type: String,
+  },
 });
 
 module.exports = mongoose.model("authModel", authModel);

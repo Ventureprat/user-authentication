@@ -1,20 +1,12 @@
 const express = require("express");
 const router = express.Router();
-
-router.use(express.json());
+const jwt = require("jsonwebtoken");
+const tokenAuth = require("../Middlewares/tokenAuth");
 
 const bcrypt = require("bcrypt");
 
 //Model Import
 const authModel = require("../Model/authModel");
-
-const passHash = (password) => {
-  return bcrypt.hashSync(password, 10);
-};
-
-const comparePass = (password, matchedPass) => {
-  return bcrypt.compareSync(password, matchedPass);
-};
 
 router.get("/", (req, res) => {
   res.json({ text: "Welcome to the auth Page" });
@@ -22,11 +14,17 @@ router.get("/", (req, res) => {
 
 router.post("/signup", async (req, res) => {
   const { email, password } = req.body;
-  const hashedPass = passHash(password);
+  const hashedPass = bcrypt.hashSync(password, 10);
   const newUser = new authModel({
     email: email,
     password: hashedPass,
   });
+
+  const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, {
+    expiresIn: "2h",
+  });
+
+  newUser.token = token;
 
   await newUser.save((err, savedData) => {
     if (err) {
@@ -55,17 +53,36 @@ router.post("/login", async (req, res) => {
         text: "User Not Found",
       });
     } else {
-      const passVerify = comparePass(password, data[0].password);
+      const token = jwt.sign({ userId: data[0]._id }, process.env.JWT_SECRET, {
+        expiresIn: "2h",
+      });
+      await authModel.findByIdAndUpdate(data[0]._id, { token });
+
+      const passVerify = bcrypt.compareSync(password, data[0].password);
+
       if (passVerify == true) {
-        res.json({
+        res.status(200).json({
           text: "Login Successful",
-          data: data,
+          data: {
+            email: data[0].email,
+            password: data[0].password,
+            token: token,
+          },
         });
       } else {
         res.json({
           text: "Invalid Password",
         });
       }
+    }
+  });
+});
+
+router.get("/users", tokenAuth, async (req, res) => {
+  authModel.find({}).exec(function (err, data) {
+    if (err) res.send(err);
+    else {
+      res.json(req.user);
     }
   });
 });
