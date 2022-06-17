@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
 const tokenAuth = require("../Middlewares/tokenAuth");
+const { roleAdmin, roleBasic } = require("../Middlewares/roleAuthorization");
 
 const bcrypt = require("bcrypt");
 
@@ -13,11 +14,12 @@ router.get("/", (req, res) => {
 });
 
 router.post("/signup", async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, role } = req.body;
   const hashedPass = bcrypt.hashSync(password, 10);
   const newUser = new authModel({
     email: email,
     password: hashedPass,
+    role: role,
   });
 
   const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, {
@@ -66,6 +68,7 @@ router.post("/login", async (req, res) => {
           data: {
             email: data[0].email,
             password: data[0].password,
+            role: data[0].role,
             token: token,
           },
         });
@@ -78,13 +81,20 @@ router.post("/login", async (req, res) => {
   });
 });
 
-router.get("/users", tokenAuth, async (req, res) => {
-  authModel.find({}).exec(function (err, data) {
+//routers to test authorization
+
+router.get("/users", tokenAuth, roleAdmin, async (req, res) => {
+  const { userId } = req.user;
+  authModel.find({ _id: userId }).exec(function (err, data) {
     if (err) res.send(err);
     else {
-      res.json(req.user);
+      res.json(data);
     }
   });
+});
+
+router.get("/basicUser", tokenAuth, roleBasic, async (req, res) => {
+  res.json({ text: "Welcome basic-User/Admin" });
 });
 
 module.exports = router;
