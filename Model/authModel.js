@@ -12,6 +12,11 @@ const authModel = new mongoose.Schema({
     required: true,
     trim: true,
   },
+  // 2 roles - admin & basic
+  role: {
+    type: String,
+    required: true,
+  },
   token: {
     type: String,
   },

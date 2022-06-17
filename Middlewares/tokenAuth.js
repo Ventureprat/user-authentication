@@ -1,8 +1,7 @@
 const jwt = require("jsonwebtoken");
 
 const tokenAuth = (req, res, next) => {
-  const token =
-    req.body.token || req.query.token || req.headers["x-access-token"];
+  const token = req.headers["x-access-token"];
 
   if (!token) {
     res.status(403).send("An Authentication Token Is Required");
