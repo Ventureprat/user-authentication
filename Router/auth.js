@@ -15,31 +15,35 @@ router.get("/", (req, res) => {
 
 router.post("/signup", async (req, res) => {
   const { email, password, role } = req.body;
-  const hashedPass = bcrypt.hashSync(password, 10);
-  const newUser = new authModel({
-    email: email,
-    password: hashedPass,
-    role: role,
-  });
+  if (email == "" || password == "" || role == "") {
+    res.status(401).json("Please fill the fields correctly");
+  } else {
+    const hashedPass = bcrypt.hashSync(password, 10);
+    const newUser = new authModel({
+      email: email,
+      password: hashedPass,
+      role: role,
+    });
 
-  const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, {
-    expiresIn: "2h",
-  });
+    const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, {
+      expiresIn: "2h",
+    });
 
-  newUser.token = token;
+    newUser.token = token;
 
-  await newUser.save((err, savedData) => {
-    if (err) {
-      res.json({
-        error: err,
-      });
-    } else {
-      res.json({
-        text: "Success",
-        data: savedData,
-      });
-    }
-  });
+    await newUser.save((err, savedData) => {
+      if (err) {
+        res.json({
+          error: err,
+        });
+      } else {
+        res.json({
+          text: "Success",
+          data: savedData,
+        });
+      }
+    });
+  }
 });
 
 router.post("/login", async (req, res) => {

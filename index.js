@@ -29,5 +29,8 @@ mongoose.connect("mongodb://localhost:27017/authDB", () => {
 app.get("/", (req, res) => {
   res.render("index", { data: { page: "Home Page" } });
 });
+app.get("/signup", (req, res) => {
+  res.render("signup");
+});
 
 app.listen(3000, () => console.log("Server Started..."));
