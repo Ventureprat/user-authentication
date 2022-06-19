@@ -108,13 +108,13 @@
 
       function postData(email, password, role) {
         const userData = { email, password, role };
-
         axios
           .post("http://localhost:3000/auth/signup", userData)
           .then(function (response) {
             if (response.status === 200) {
               alert("Signup Successful");
-              location.reload();
+              // location.reload();
+              console.log(response);
             } else {
               alert("Try Again");
             }
