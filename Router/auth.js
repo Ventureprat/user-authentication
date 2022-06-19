@@ -37,6 +37,7 @@ router.post("/signup", async (req, res) => {
           error: err,
         });
       } else {
+        res.cookie("token", savedData.token, { httpOnly: true });
         res.json({
           text: "Success",
           data: savedData,
