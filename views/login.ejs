@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SignUp Page</title>
+    <title>Login Page</title>
     <style>
       html {
         background-color: rgba(165, 42, 42, 0.712);
@@ -28,10 +28,7 @@
         height: 2rem;
         padding-left: 0.4rem;
       }
-      .checkBox-container {
-        display: flex;
-        gap: 2rem;
-      }
+
       .form-btn-submit {
         width: 90%;
         height: 2rem;
@@ -58,32 +55,7 @@
         placeholder="password"
       />
 
-      <div class="checkBox-container">
-        <label for="roles">Role:</label>
-
-        <label for="admin"
-          >Admin
-          <input
-            type="radio"
-            name="checkBox"
-            id="form-checkbox-1"
-            class="form-checkbox"
-            value="admin"
-          />
-        </label>
-        <label for="Basic"
-          >Basic
-          <input
-            type="radio"
-            name="checkBox"
-            id="form-checkbox-2"
-            class="form-checkbox"
-            value="basic"
-          />
-        </label>
-      </div>
-
-      <button type="submit" class="form-btn-submit">SignUp</button>
+      <button type="submit" class="form-btn-submit">Login</button>
     </form>
     <script>
       const submit = document.querySelector(".form-btn-submit");
@@ -94,35 +66,34 @@
         e.preventDefault();
         const emailText = document.querySelector("#form-emailID").value;
         const passwordText = document.querySelector("#form-password").value;
-        const checkBox = document.querySelector(
-          'input[name="checkBox"]:checked'
-        ).value;
 
-        if (emailText !== "" && passwordText !== "" && checkBox !== "") {
-          postData(emailText, passwordText, checkBox);
+        if (emailText !== "" && passwordText !== "") {
+          postData(emailText, passwordText);
         } else {
           alert("Check if all the fields are filled");
         }
       }
 
-      async function postData(email, password, role) {
-        const userData = { email, password, role };
+      async function postData(email, password) {
+        const userData = { email, password };
 
         try {
           await axios
-            .post("http://localhost:3000/auth/signup", userData)
+            .post("http://localhost:3000/auth/login", userData)
             .then(function (response) {
               if (response.status === 200) {
-                alert("Signup Successful");
-                location.reload();
+                alert("Login Successful");
+                window.location.replace("http://localhost:3000/dashboard");
               } else {
                 alert("Try Again...");
               }
             });
         } catch (error) {
-          if (error.response.status == 403) {
-            alert("User already Exists. Go To Login Page.");
-            window.location.replace("http://localhost:3000/login");
+          if (error.response.status === 404) {
+            alert("User Not Found");
+            location.reload();
+          } else if (error.response.status === 401) {
+            alert("Invalid Password");
           }
         }
       }

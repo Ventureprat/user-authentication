@@ -18,29 +18,47 @@ router.post("/signup", async (req, res) => {
   if (email == "" || password == "" || role == "") {
     res.status(401).json("Please fill the fields correctly");
   } else {
-    const hashedPass = bcrypt.hashSync(password, 10);
-    const newUser = new authModel({
-      email: email,
-      password: hashedPass,
-      role: role,
-    });
-
-    const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, {
-      expiresIn: "2h",
-    });
-
-    newUser.token = token;
-
-    await newUser.save((err, savedData) => {
+    //Check if user already exists
+    authModel.findOne({ email }).exec(async function (err, data) {
       if (err) {
         res.json({
-          error: err,
+          text: err,
+        });
+      } else if (data) {
+        res.status(403).json({
+          text: "User Already Exists. Go To Login Page",
         });
       } else {
-        res.cookie("token", savedData.token, { httpOnly: true });
-        res.json({
-          text: "Success",
-          data: savedData,
+        //if user doesn't exists
+        const hashedPass = bcrypt.hashSync(password, 10);
+        const newUser = new authModel({
+          email: email,
+          password: hashedPass,
+          role: role,
+        });
+
+        const token = jwt.sign(
+          { userId: newUser._id },
+          process.env.JWT_SECRET,
+          {
+            expiresIn: "2h",
+          }
+        );
+
+        newUser.token = token;
+
+        await newUser.save((err, savedData) => {
+          if (err) {
+            res.json({
+              error: err,
+            });
+          } else {
+            res.cookie("token", savedData.token, { httpOnly: true });
+            res.json({
+              text: "Success",
+              data: savedData,
+            });
+          }
         });
       }
     });
@@ -56,7 +74,7 @@ router.post("/login", async (req, res) => {
         text: err,
       });
     } else if (data.length == 0) {
-      res.status(200).json({
+      res.status(404).json({
         text: "User Not Found",
       });
     } else {
@@ -78,7 +96,7 @@ router.post("/login", async (req, res) => {
           },
         });
       } else {
-        res.json({
+        res.status(401).json({
           text: "Invalid Password",
         });
       }
