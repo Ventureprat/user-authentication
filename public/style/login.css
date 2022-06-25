@@ -1,0 +1,37 @@
+
+.form-container {
+        width: 20rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 1.5rem;
+        margin: auto;
+        margin-top: 10rem;
+        padding: 1.5rem;
+        background-color: aquamarine;
+        border-radius: 5px;
+        border: 2px solid yellow;
+      }
+      .form-textBox {
+        width: 90%;
+        height: 2rem;
+        padding-left: 0.4rem;
+      }
+
+      .form-btn-submit {
+        width: 90%;
+        height: 2rem;
+        border-radius: 4px;
+        background-color: rgb(25, 25, 246);
+        color: aliceblue;
+      }
+
+      .google-signin {
+        width: 13rem;
+        height: 4rem;
+        position: relative;
+        top: 2rem;
+        left: 17rem;
+        cursor: pointer;
+      }

@@ -5,38 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login Page</title>
-    <style>
-      html {
-        background-color: rgba(165, 42, 42, 0.712);
-      }
-      .form-container {
-        width: 20rem;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        gap: 1.5rem;
-        margin: auto;
-        margin-top: 10rem;
-        padding: 1.5rem;
-        background-color: aquamarine;
-        border-radius: 5px;
-        border: 2px solid yellow;
-      }
-      .form-textBox {
-        width: 90%;
-        height: 2rem;
-        padding-left: 0.4rem;
-      }
-
-      .form-btn-submit {
-        width: 90%;
-        height: 2rem;
-        border-radius: 4px;
-        background-color: rgb(25, 25, 246);
-        color: aliceblue;
-      }
-    </style>
+    <link rel="stylesheet" href="/style/login.css" />
   </head>
   <body>
     <form class="form-container">
@@ -57,47 +26,14 @@
 
       <button type="submit" class="form-btn-submit">Login</button>
     </form>
-    <script>
-      const submit = document.querySelector(".form-btn-submit");
 
-      submit.addEventListener("click", submitOnclick);
+    <img
+      src="/images/image-google-sign-in.png"
+      alt="google-signin"
+      class="google-signin"
+    />
 
-      function submitOnclick(e) {
-        e.preventDefault();
-        const emailText = document.querySelector("#form-emailID").value;
-        const passwordText = document.querySelector("#form-password").value;
-
-        if (emailText !== "" && passwordText !== "") {
-          postData(emailText, passwordText);
-        } else {
-          alert("Check if all the fields are filled");
-        }
-      }
-
-      async function postData(email, password) {
-        const userData = { email, password };
-
-        try {
-          await axios
-            .post("http://localhost:3000/auth/login", userData)
-            .then(function (response) {
-              if (response.status === 200) {
-                alert("Login Successful");
-                window.location.replace("http://localhost:3000/dashboard");
-              } else {
-                alert("Try Again...");
-              }
-            });
-        } catch (error) {
-          if (error.response.status === 404) {
-            alert("User Not Found");
-            location.reload();
-          } else if (error.response.status === 401) {
-            alert("Invalid Password");
-          }
-        }
-      }
-    </script>
+    <script src="/scripts/login.js"></script>
 
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   </body>
