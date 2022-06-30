@@ -4,8 +4,6 @@ const mongoose = require("mongoose");
 const { google } = require("googleapis");
 
 const cookieParser = require("cookie-parser");
-const url = require("url");
-const queryString = require("query-string");
 app.use(express.static("public"));
 app.use(cookieParser());
 app.use(express.json());
