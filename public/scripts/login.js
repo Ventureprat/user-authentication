@@ -1,4 +1,5 @@
 const submit = document.querySelector(".form-btn-submit");
+const googleSignIn = document.querySelector(".google-signin");
 
 submit.addEventListener("click", submitOnclick);
 
@@ -37,3 +38,7 @@ async function postData(email, password) {
     }
   }
 }
+
+googleSignIn.addEventListener("click", () => {
+  window.location.replace("http://localhost:3000/auth/google");
+});

@@ -3,7 +3,6 @@ const router = express.Router();
 const jwt = require("jsonwebtoken");
 const tokenAuth = require("../Middlewares/tokenAuth");
 const { roleAdmin, roleBasic } = require("../Middlewares/roleAuthorization");
-
 const bcrypt = require("bcrypt");
 
 //Model Import
@@ -119,5 +118,7 @@ router.get("/users", tokenAuth, roleAdmin, async (req, res) => {
 router.get("/basicUser", tokenAuth, roleBasic, async (req, res) => {
   res.json({ text: "Welcome basic-User/Admin" });
 });
+
+// google oauth - googlesignin;
 
 module.exports = router;

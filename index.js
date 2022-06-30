@@ -1,8 +1,11 @@
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
+const { google } = require("googleapis");
 
 const cookieParser = require("cookie-parser");
+const url = require("url");
+const queryString = require("query-string");
 app.use(express.static("public"));
 app.use(cookieParser());
 app.use(express.json());
@@ -19,6 +22,10 @@ app.use((req, res, next) => {
 
 //import modules
 const auth = require("./Router/auth");
+
+//google-sign-in model Import
+const googleSignIn = require("./Router/google-signin");
+app.use("/", googleSignIn);
 
 //Template Engine
 app.set("view engine", "ejs");
