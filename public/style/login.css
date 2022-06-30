@@ -1,4 +1,10 @@
-
+.login-container{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+}
 .form-container {
         width: 20rem;
         display: flex;
@@ -30,8 +36,5 @@
       .google-signin {
         width: 13rem;
         height: 4rem;
-        position: relative;
-        top: 2rem;
-        left: 17rem;
         cursor: pointer;
       }
