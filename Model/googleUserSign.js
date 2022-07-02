@@ -1,6 +1,9 @@
 const mongoose = require("mongoose");
 
 const googleUserSign = new mongoose.Schema({
+  googleId: {
+    type: String,
+  },
   email: {
     type: String,
     trim: true,
@@ -12,7 +15,10 @@ const googleUserSign = new mongoose.Schema({
     type: String,
     required: true,
   },
-  token: {
+  access_token: {
+    type: String,
+  },
+  refresh_token: {
     type: String,
   },
 });

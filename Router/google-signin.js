@@ -1,12 +1,14 @@
 const express = require("express");
+const ObjectId = require("mongoose").Types.ObjectId;
 const { google } = require("googleapis");
 const router = express.Router();
-const passport = require("passport");
-const urlParse = require("url-parse");
+// const passport = require("passport");
+// const urlParse = require("url-parse");
 const queryString = require("query-string");
+const axios = require("axios");
 
 //User model
-// const googleUserSign = require("../Model/googleUserSign");
+const googleUserSignModel = require("../Model/googleUserSign");
 
 // const GoogleStrategy = require("passport-google-oauth2").Strategy;
 
@@ -80,8 +82,8 @@ const scopes = [
 
 const authorizationUrl = oauth2Client.generateAuthUrl({
   access_type: "offline",
+  prompt: "consent",
   scope: scopes,
-  include_granted_scopes: true,
 });
 
 let userCredential = null;
@@ -90,18 +92,78 @@ router.get("/auth/google", (req, res) => {
   res.redirect(authorizationUrl);
 });
 
+const googleUserFunc = (tokens) => {
+  return axios
+    .get(
+      `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${tokens.access_token}`,
+      {
+        headers: {
+          Authorization: `Bearer ${tokens.id_token}`,
+        },
+      }
+    )
+    .then((res) => res.data)
+    .catch((err) => {
+      throw new Error(err.message);
+    });
+};
+
 router.get("/auth/google/callback", async (req, res) => {
   let q = queryString.parseUrl(req.url).query;
-
   if (q.error) {
-    console.log("Error:" + q.error);
+    throw new Error(q.error);
   } else {
     let { tokens } = await oauth2Client.getToken(q.code);
     oauth2Client.setCredentials(tokens);
 
     userCredential = tokens;
-    res.json({
-      token: userCredential,
+
+    const { id, email } = await googleUserFunc(tokens);
+
+    await googleUserSignModel.find({ googleId: id }).exec(function (err, data) {
+      if (err) {
+        throw new Error(err);
+      } else if (data.length == 0) {
+        const newUserGoogleSign = new googleUserSignModel({
+          googleId: id,
+          email: email,
+          role: "basic",
+          access_token: tokens.access_token,
+          refresh_token: tokens.refresh_token,
+        });
+
+        newUserGoogleSign.save(function (err, data) {
+          if (err) {
+            throw new Error(err.message);
+          } else {
+            res.json({
+              text: "Google Sign-in Successful",
+              data: data,
+            });
+          }
+        });
+      } else {
+        console.log;
+        googleUserSignModel.updateMany(
+          { googleId: id },
+          {
+            $set: {
+              access_token: tokens.access_token,
+              refresh_token: tokens.refresh_token,
+            },
+          },
+          function (err, data) {
+            if (err) {
+              throw new Error(err);
+            } else {
+              res.json({
+                text: "User Already registered.Tokens Updated",
+                dataLogs: data,
+              });
+            }
+          }
+        );
+      }
     });
   }
 });
