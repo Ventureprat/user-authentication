@@ -1,6 +1,6 @@
 const express = require("express");
-const ObjectId = require("mongoose").Types.ObjectId;
 const { google } = require("googleapis");
+const jwt = require("jsonwebtoken");
 const router = express.Router();
 // const passport = require("passport");
 // const urlParse = require("url-parse");
@@ -118,53 +118,59 @@ router.get("/auth/google/callback", async (req, res) => {
 
     userCredential = tokens;
 
-    const { id, email } = await googleUserFunc(tokens);
+    const googleUserData = await googleUserFunc(tokens);
+    const { id, email } = await googleUserData;
 
-    await googleUserSignModel.find({ googleId: id }).exec(function (err, data) {
-      if (err) {
-        throw new Error(err);
-      } else if (data.length == 0) {
-        const newUserGoogleSign = new googleUserSignModel({
-          googleId: id,
-          email: email,
-          role: "basic",
-          access_token: tokens.access_token,
-          refresh_token: tokens.refresh_token,
-        });
-
-        newUserGoogleSign.save(function (err, data) {
-          if (err) {
-            throw new Error(err.message);
-          } else {
-            res.json({
-              text: "Google Sign-in Successful",
-              data: data,
-            });
-          }
-        });
-      } else {
-        console.log;
-        googleUserSignModel.updateMany(
-          { googleId: id },
-          {
-            $set: {
-              access_token: tokens.access_token,
-              refresh_token: tokens.refresh_token,
-            },
-          },
-          function (err, data) {
-            if (err) {
-              throw new Error(err);
-            } else {
-              res.json({
-                text: "User Already registered.Tokens Updated",
-                dataLogs: data,
-              });
-            }
-          }
-        );
-      }
+    const jwtToken = jwt.sign(googleUserData, process.env.JWT_SECRET, {
+      expiresIn: "2h",
     });
+
+    await googleUserSignModel
+      .find({ googleId: id })
+      .exec(async function (err, data) {
+        if (err) {
+          throw new Error(err);
+        } else if (data.length == 0) {
+          const newUserGoogleSign = new googleUserSignModel({
+            googleId: id,
+            email: email,
+            role: "basic",
+            token: tokens,
+            jwtToken: jwtToken,
+          });
+
+          await newUserGoogleSign.save(function (err, savedData) {
+            if (err) {
+              throw new Error(err.message);
+            } else {
+              res.cookie("token", savedData.jwtToken, {
+                httpOnly: true,
+              });
+              res.redirect("http://localhost:3000/login");
+            }
+          });
+        } else {
+          googleUserSignModel.updateMany(
+            { googleId: id },
+            {
+              $set: {
+                token: tokens,
+                jwtToken: jwtToken,
+              },
+            },
+            function (err, data) {
+              if (err) {
+                throw new Error(err);
+              } else {
+                res.cookie("token", jwtToken, {
+                  httpOnly: true,
+                });
+                res.redirect("http://localhost:3000/login");
+              }
+            }
+          );
+        }
+      });
   }
 });
 

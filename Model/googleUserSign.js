@@ -15,10 +15,10 @@ const googleUserSign = new mongoose.Schema({
     type: String,
     required: true,
   },
-  access_token: {
-    type: String,
+  token: {
+    type: mongoose.Schema.Types.Mixed,
   },
-  refresh_token: {
+  jwtToken: {
     type: String,
   },
 });
