@@ -108,8 +108,9 @@ router.post("/login", async (req, res) => {
 router.get("/users", tokenAuth, roleAdmin, async (req, res) => {
   const { userId } = req.user;
   authModel.find({ _id: userId }).exec(function (err, data) {
-    if (err) res.send(err);
-    else {
+    if (err) {
+      throw new Error(err);
+    } else {
       res.json(data);
     }
   });
