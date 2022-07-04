@@ -121,9 +121,16 @@ router.get("/auth/google/callback", async (req, res) => {
     const googleUserData = await googleUserFunc(tokens);
     const { id, email } = await googleUserData;
 
-    const jwtToken = jwt.sign(googleUserData, process.env.JWT_SECRET, {
-      expiresIn: "2h",
-    });
+    const jwtToken = jwt.sign(
+      {
+        googleId: id,
+        email: email,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "2h",
+      }
+    );
 
     await googleUserSignModel
       .find({ googleId: id })
